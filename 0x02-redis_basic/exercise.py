@@ -26,15 +26,15 @@ def count_calls(method: Callable) -> Callable:
 
 def call_history(method: Callable) -> Callable:
     """
-    @Decorator
-    Stores the history of inputs and outputs for a particular function.
+    A Decorator for storing the history of inputs and outputs
+    for a particular function.
     """
     key = method.__qualname__
     inputs = key + ":inputs"
     outputs = key + ":outputs"
 
     @wraps(method)
-    def wrapper(self, *args, **kwargs):  # sourcery skip: avoid-builtin-shadow
+    def wrapper(self, *args, **kwargs):
         """
         Wrapper for decorator functionality
         """
@@ -48,7 +48,7 @@ def call_history(method: Callable) -> Callable:
 
 def replay(method: Callable) -> None:
     """
-    Display the history of calls of a particular function.
+    Displays the history of calls of a particular function.
     """
     name = method.__qualname__
     cache = Redis()
@@ -65,7 +65,10 @@ class Cache:
     """
     Represents a cache.
     """
-    def __init__(self) -> None:
+    def __init__(self):
+        """
+        Initializes a cache instance and gets rid of it after.
+        """
         self._redis = Redis()
         self._redis.flushdb()
 
@@ -73,7 +76,7 @@ class Cache:
     @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
-        Generate a random key for input data.
+        Generates a random key for input data.
         Takes a data argument and returns a string.
         """
         rand_key = str(uuid4())

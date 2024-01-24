@@ -10,7 +10,7 @@ redis = Redis()
 
 def count_requests(method: Callable) -> Callable:
     """
-     Track the number of times a particular URL was accessed in the key.
+     Tracks the number of times a particular URL was accessed in the key.
     """
     @wraps(method)
     def wrapper(url):
@@ -24,7 +24,6 @@ def count_requests(method: Callable) -> Callable:
         html = method(url)
         redis.setex(f"cached:{url}", 10, html)
         return html
-
     return wrapper
 
 
