@@ -10,7 +10,8 @@ redis = Redis()
 
 def count_requests(method: Callable) -> Callable:
     """
-     Tracks the number of times a particular URL was accessed in the key.
+     Tracks the number of times a particular URL
+     was accessed in the key.
     """
     @wraps(method)
     def wrapper(url):
@@ -31,6 +32,7 @@ def count_requests(method: Callable) -> Callable:
 def get_page(url: str) -> str:
     """
     Obtains the HTML content of a  URL.
+    Returns a string.
     """
     req = requests.get(url)
     return req.text

@@ -19,7 +19,7 @@ def count_calls(method: Callable) -> Callable:
             Wrapper function.
         """
         key = method.__qualname__
-        self._redis.incr(key)
+        self.__redis.incr(key)
         return method(self, *args, **kwargs)
     return wrapper
 
@@ -38,9 +38,9 @@ def call_history(method: Callable) -> Callable:
         """
         Wrapper for decorator functionality
         """
-        self._redis.rpush(inputs, str(args))
+        self.__redis.rpush(inputs, str(args))
         data = method(self, *args, **kwargs)
-        self._redis.rpush(outputs, str(data))
+        self.__redis.rpush(outputs, str(data))
         return data
 
     return wrapper
@@ -48,7 +48,8 @@ def call_history(method: Callable) -> Callable:
 
 def replay(method: Callable) -> None:
     """
-    Displays the history of calls of a particular function.
+    Displays the history of calls
+    of a particular function.
     """
     name = method.__qualname__
     cache = Redis()
@@ -64,13 +65,14 @@ def replay(method: Callable) -> None:
 class Cache:
     """
     Represents a cache.
+    With a Redis instance as attribute.
     """
     def __init__(self):
         """
         Initializes a cache instance and gets rid of it after.
         """
-        self._redis = Redis()
-        self._redis.flushdb()
+        self.__redis = Redis()
+        self.__redis.flushdb()
 
     @count_calls
     @call_history
@@ -80,15 +82,16 @@ class Cache:
         Takes a data argument and returns a string.
         """
         rand_key = str(uuid4())
-        self._redis.set(rand_key, data)
+        self.__redis.set(rand_key, data)
         return rand_key
 
     def get(self, key: str,
             fn: Optional[Callable] = None) -> Union[str, bytes, int, float]:
         """
         Retrieves data from the Redis server.
+        Returns a list.
         """
-        data = self._redis.get(key)
+        data = self.__redis.get(key)
         if fn:
             data = fn(data)
         return data
@@ -96,15 +99,17 @@ class Cache:
     def get_str(self, key: str) -> str:
         """
         Retrieves a string from the cache.
+        Returns a string.
         """
-        data = self._redis.get(key)
+        data = self.__redis.get(key)
         return data.decode("utf-8")
 
     def get_int(self, key: str) -> int:
         """
         Retrieves an integer from the cache.
+        Returns an int.
         """
-        data = self._redis.get(key)
+        data = self.__redis.get(key)
         try:
             data = int(data.decode("utf-8"))
         except Exception:
