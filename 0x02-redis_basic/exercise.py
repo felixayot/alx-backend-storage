@@ -19,7 +19,7 @@ def count_calls(method: Callable) -> Callable:
             Wrapper function.
         """
         key = method.__qualname__
-        self.__redis.incr(key)
+        self._redis.incr(key)
         return method(self, *args, **kwargs)
     return wrapper
 
@@ -38,9 +38,9 @@ def call_history(method: Callable) -> Callable:
         """
         Wrapper for decorator functionality
         """
-        self.__redis.rpush(inputs, str(args))
+        self._redis.rpush(inputs, str(args))
         data = method(self, *args, **kwargs)
-        self.__redis.rpush(outputs, str(data))
+        self._redis.rpush(outputs, str(data))
         return data
 
     return wrapper
@@ -71,8 +71,8 @@ class Cache:
         """
         Initializes a cache instance and gets rid of it after.
         """
-        self.__redis = Redis()
-        self.__redis.flushdb()
+        self._redis = Redis()
+        self._redis.flushdb()
 
     @count_calls
     @call_history
@@ -82,7 +82,7 @@ class Cache:
         Takes a data argument and returns a string.
         """
         rand_key = str(uuid4())
-        self.__redis.set(rand_key, data)
+        self._redis.set(rand_key, data)
         return rand_key
 
     def get(self, key: str,
@@ -91,7 +91,7 @@ class Cache:
         Retrieves data from the Redis server.
         Returns a list.
         """
-        data = self.__redis.get(key)
+        data = self._redis.get(key)
         if fn:
             data = fn(data)
         return data
@@ -101,7 +101,7 @@ class Cache:
         Retrieves a string from the cache.
         Returns a string.
         """
-        data = self.__redis.get(key)
+        data = self._redis.get(key)
         return data.decode("utf-8")
 
     def get_int(self, key: str) -> int:
@@ -109,7 +109,7 @@ class Cache:
         Retrieves an integer from the cache.
         Returns an int.
         """
-        data = self.__redis.get(key)
+        data = self._redis.get(key)
         try:
             data = int(data.decode("utf-8"))
         except Exception:
